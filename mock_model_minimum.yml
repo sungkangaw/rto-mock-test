@@ -1,0 +1,55 @@
+stages:
+  - name: buildTTGateway
+    transformations:
+      - checkout
+      - compile
+      - rto-dist
+      - rto-optimize-testtime
+      - rto-optimize-failedfirst
+
+transformations:
+  - name: checkout
+    service: git-service
+    command: checkout
+    parameters:
+      repositoryUri: https://github.com/sungkangaw/rto-mock-test.git
+
+  - name: compile
+    service: maven-service
+    command: compile
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+    parameters:
+      workspace: "@repo"
+
+  - name: rto-dist
+    service: rto-test-service
+    command: discover
+    dependsOn:
+      - alias: compile
+        ref: p://this/transformations/compile/classes
+    parameters:
+      classes: "@compile"
+
+assessments:
+  - name: rto-run
+    service: rto-test-service
+    command: execute
+    dependsOn:
+      - alias: compile
+        ref: p://this/transformations/compile/classes
+      - alias: testclasses
+        ref: p://this/transformations/rto-dist/testClasses
+    parameters:
+      classes: "@compile"
+      testOrder: "@testclasses"
+ 
+qualityGates: 
+  - strategy: auto
+    policies:
+      - name: PassedTestRate
+        interpretation: threshold-
+        actualValue: passedRate
+        setPoint: 1
+        assessmentRef: p://this/assessments/rto-run
