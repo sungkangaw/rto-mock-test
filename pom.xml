@@ -27,10 +27,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <properties>
-        <jackson.version>2.9.5</jackson.version>
-        <testsuite.class>**/RTOServiceTestSuite.class</testsuite.class>
-    </properties>
 
     <build>
         <pluginManagement>
